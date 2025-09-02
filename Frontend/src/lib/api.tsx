@@ -99,3 +99,23 @@ export async function fetchAllBusinesses(page: number = 1, limit: number = 20): 
   // La respuesta del backend ahora es un objeto que contiene la lista y la info de paginación
   return response.json();
 }
+
+export async function fetchKpi(kpiRequest: {
+  collection: string;
+  op: 'count' | 'sum' | 'avg' | 'min' | 'max';
+  valueField?: string;
+  match: Record<string, any>;
+}): Promise<{ value: number }> {
+  // Asumimos que tu endpoint /kpi está en la misma ruta que /compare
+  const response = await fetch(`${API_BASE_URL}/api/v1/metrics/data`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(kpiRequest),
+  });
+  if (!response.ok) {
+    throw new Error(`Error al obtener el KPI: ${kpiRequest.op}`);
+  }
+  return response.json();
+}
