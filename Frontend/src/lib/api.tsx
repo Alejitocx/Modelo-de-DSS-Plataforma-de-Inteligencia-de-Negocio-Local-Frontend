@@ -1,15 +1,13 @@
 // src/lib/api.ts
 
-const API_BASE_URL = 'http://localhost:4000'; // La URL de tu backend
+const API_BASE_URL = 'http://localhost:4000'; 
 
-// Interfaz para los datos que vienen del endpoint /compare
 export interface CompareData {
   ratingOverTime: ChartData;
   reviewsOverTime: ChartData;
   ratingDistribution: ChartData;
 }
 
-// Interfaz para los datos de un gráfico
 export interface ChartData {
   labels: string[];
   datasets: {
@@ -18,7 +16,6 @@ export interface ChartData {
   }[];
 }
 
-// Interfaz para los datos que vienen del endpoint /impact
 export interface ImpactData {
   byAttribute: AttributeCorrelation[];
   diff: any[];
@@ -31,9 +28,6 @@ export interface AttributeCorrelation {
   count: number;
 }
 
-/**
- * Llama al endpoint /compare para obtener las métricas de los competidores.
- */
 export async function fetchCompareMetrics(businessIds: string[]): Promise<CompareData> {
   const response = await fetch(`${API_BASE_URL}/api/v1/competitors/compare`, {
     method: 'POST',
@@ -42,19 +36,14 @@ export async function fetchCompareMetrics(businessIds: string[]): Promise<Compar
     },
     body: JSON.stringify({
       businessIds: businessIds,
-      // Puedes agregar 'from', 'to', 'interval' si quieres que sean dinámicos
     }),
   });
   if (!response.ok) {
-  // Para depurar mejor, podemos mostrar el status del error
     console.error('Error en fetchCompareMetrics:', response.status, response.statusText);
     throw new Error('Error al obtener las métricas de comparación')  }
   return response.json();
 }
 
-/**
- * Llama al endpoint /impact para obtener el análisis de atributos.
- */
 export async function fetchAttributeImpact(attributes: string[]): Promise<ImpactData> {
   const response = await fetch(`${API_BASE_URL}/api/v1/attributes/impact`, {
     method: 'POST',
@@ -63,23 +52,19 @@ export async function fetchAttributeImpact(attributes: string[]): Promise<Impact
     },
     body: JSON.stringify({
       attributes: attributes,
-      // Puedes agregar 'category' o 'geo' para filtrar
     }),
   });
   if (!response.ok) {
- // Para depurar mejor, podemos mostrar el status del error
     console.error('Error en fetchCompareMetrics:', response.status, response.statusText);
     throw new Error('Error al obtener las métricas de comparación')
   }
   return response.json();
 }
-
-// NUEVO: Interfaz para la respuesta paginada de negocios
 export interface PaginatedBusinessesResponse {
   totalNegocios: number;
   paginaActual: number;
   totalPaginas: number;
-  negocios: any[]; // El array de negocios ahora viene dentro de este objeto
+  negocios: any[]; 
 }
 
 /**
@@ -96,7 +81,6 @@ export async function fetchAllBusinesses(page: number = 1, limit: number = 20): 
     throw new Error('Error al obtener la lista de negocios');
   }
   
-  // La respuesta del backend ahora es un objeto que contiene la lista y la info de paginación
   return response.json();
 }
 
@@ -106,7 +90,6 @@ export async function fetchKpi(kpiRequest: {
   valueField?: string;
   match: Record<string, any>;
 }): Promise<{ value: number }> {
-  // Asumimos que tu endpoint /kpi está en la misma ruta que /compare
   const response = await fetch(`${API_BASE_URL}/api/v1/metrics/data`, {
     method: 'POST',
     headers: {
@@ -116,6 +99,18 @@ export async function fetchKpi(kpiRequest: {
   });
   if (!response.ok) {
     throw new Error(`Error al obtener el KPI: ${kpiRequest.op}`);
+  }
+  return response.json();
+}
+
+export async function fetchBusinessAttributes(businessIds: string[]): Promise<any[]> {
+  const response = await fetch(`${API_BASE_URL}/api/v1/attributes/attributes-compare`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ businessIds }),
+  });
+  if (!response.ok) {
+    throw new Error('Error al obtener los atributos de los negocios');
   }
   return response.json();
 }

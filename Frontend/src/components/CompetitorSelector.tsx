@@ -5,8 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
-import { X, Loader2 } from 'lucide-react'; // Importamos un ícono de carga
-import { fetchAllBusinesses } from '../lib/api'; // Importamos la función de API actualizada
+import { X, Loader2 } from 'lucide-react'; 
+import { fetchAllBusinesses } from '../lib/api'; 
 
 export interface Competitor {
   id: string;
@@ -35,13 +35,9 @@ export function CompetitorSelector({ selectedCompetitors, onCompetitorsChange }:
       try {
         const response = await fetchAllBusinesses(1, 20);
         
-        // --- LA CORRECCIÓN ESTÁ AQUÍ ---
         const formattedCompetitors = response.negocios.map(b => ({
-          // ANTES:
-          // id: b._id, 
           
-          // AHORA (la línea correcta):
-          id: b.business_id, // Usamos el business_id que coincide con las reseñas
+          id: b.business_id, 
 
           name: b.name,
           category: b.categories || 'N/A',
@@ -60,9 +56,8 @@ export function CompetitorSelector({ selectedCompetitors, onCompetitorsChange }:
     loadInitialBusinesses();
   }, []);
 
-  // NUEVO: Función para cargar más competidores
   const handleLoadMore = async () => {
-    if (currentPage >= totalPages || isLoading) return; // No hacer nada si ya estamos en la última página o si ya está cargando
+    if (currentPage >= totalPages || isLoading) return; 
 
     setIsLoading(true);
     try {
@@ -74,7 +69,6 @@ export function CompetitorSelector({ selectedCompetitors, onCompetitorsChange }:
         category: b.categories || 'N/A',
         area: b.city || 'N/A',
       }));
-      // IMPORTANTE: Añadimos los nuevos resultados a la lista existente
       setAvailableCompetitors(prev => [...prev, ...newFormattedCompetitors]);
       setCurrentPage(response.paginaActual);
     } catch (error) {
@@ -85,7 +79,6 @@ export function CompetitorSelector({ selectedCompetitors, onCompetitorsChange }:
   };
 
   const handleAddCompetitor = () => {
-    // ... (esta función no necesita cambios)
     if (selectedCompetitorId && selectedCompetitors.length < 5) {
       const competitor = availableCompetitors.find(c => c.id === selectedCompetitorId);
       if (competitor && !selectedCompetitors.find(sc => sc.id === competitor.id)) {
@@ -96,7 +89,6 @@ export function CompetitorSelector({ selectedCompetitors, onCompetitorsChange }:
   };
 
   const handleRemoveCompetitor = (competitorId: string) => {
-    // ... (esta función no necesita cambios)
     onCompetitorsChange(selectedCompetitors.filter(c => c.id !== competitorId));
   };
 
