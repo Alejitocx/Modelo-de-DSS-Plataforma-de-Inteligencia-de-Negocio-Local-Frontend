@@ -1,0 +1,71 @@
+/* Reemplaza todo el contenido de tu archivo CSS principal con esto */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* --- TEMA CLARO (LO MANTENEMOS COMO OPCIÓN) --- */
+    --background: 210 40% 98%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+    --radius: 0.5rem;
+  }
+
+  /* --- NUEVO TEMA OSCURO "CYBER-AQUA" --- */
+  .dark {
+    --background: 222 47% 11%; /* Negro azulado profundo */
+    --foreground: 210 40% 98%; /* Blanco casi puro */
+    
+    /* El color principal Aguamarina Neón */
+    --primary: 175 100% 50%;
+    --primary-foreground: 222 47% 11%;
+
+    /* Tarjetas con borde neón y fondo semitransparente */
+    --card: 222 47% 11%;
+    --card-foreground: 210 40% 98%;
+    --border: 175 100% 50% / 0.2; /* Borde aguamarina semitransparente */
+    
+    /* Acentos y secundarios */
+    --secondary: 217 32% 17%;
+    --secondary-foreground: 210 40% 98%;
+    --accent: 175 100% 50% / 0.1; /* Fondo de hover aguamarina muy sutil */
+    --accent-foreground: 175 100% 50%;
+    
+    /* Otros colores */
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 40% 98%;
+    --muted: 217 32% 17%;
+    --muted-foreground: 215 20% 65%;
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 210 40% 98%;
+    --input: 217 32% 17%;
+    --ring: 175 100% 50%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
