@@ -1,0 +1,1 @@
+# Modelo-de-DSS-Plataforma-de-Inteligencia-de-Negocio-Local-Frontend
