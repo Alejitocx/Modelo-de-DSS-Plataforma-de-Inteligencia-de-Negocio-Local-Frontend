@@ -1,14 +1,17 @@
+// En src/Dashboard.tsx (VERSIÓN FINAL CON PESTAÑA DE ADMINISTRACIÓN)
+
 import { useState, useEffect } from 'react';
 import { CompetitorSelector, Competitor } from './CompetitorSelector';
 import { MetricsCharts } from './MetricsCharts';
 import { AttributeAnalysis } from './AttributeAnalysis';
+import { JsonUploader } from './JsonUploader'; // 1. Importamos el nuevo componente
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Building2, Users, Star, BarChart3, Loader2 } from 'lucide-react';
-import { fetchCompareMetrics, fetchBusinessAttributes, fetchKpi, CompareData } from '../lib/api';
+import { fetchCompareMetrics, fetchBusinessAttributes, fetchKpi, CompareData, ImpactData } from '../lib/api';
 
-const COLOR_PALETTE = ['#00f5d4', '#ff4500', '#32cd32', '#9370db', '#00ced1', '#f1fa8c'];
+const COLOR_PALETTE = ['#1e90ff', '#ff4500', '#32cd32', '#9370db', '#00ced1', '#ffa500'];
 
 export function Dashboard() {
   const businessId = "F5N-gTCaKg2gJHEbJcqmKA"; 
@@ -23,6 +26,7 @@ export function Dashboard() {
   const [isLoadingCompare, setIsLoadingCompare] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
 
+  // Carga los datos de las tarjetas de resumen al iniciar
   useEffect(() => {
     const loadSummaryData = async () => {
       setIsLoadingSummary(true);
@@ -44,6 +48,7 @@ export function Dashboard() {
     loadSummaryData();
   }, [businessId]);
 
+  // Se ejecuta al hacer clic en el botón "Comparar"
   const handleCompare = async () => {
     if (selectedCompetitors.length === 0) return;
     setIsLoadingCompare(true);
@@ -75,69 +80,77 @@ export function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen p-4 md:p-6">
-      {/* Header con efecto neón */}
+    <div className="min-h-screen p-4 md:p-6 bg-gray-50">
       <div className="mb-8 text-center">
         <div className="inline-flex items-center gap-3 mb-4">
-          <div className="p-3 rounded-2xl bg-primary/20 border border-primary/30 shadow-lg shadow-primary/20">
-            <BarChart3 className="h-8 w-8 text-primary" />
-          </div>
-          <h1 className="text-3xl md:text-4xl font-bold text-primary drop-shadow-[0_0_8px_hsl(var(--primary))]">
-            Dashboard de Análisis Competitivo
-          </h1>
+          <div className="p-3 rounded-2xl bg-gradient-to-r from-blue-400 to-cyan-500 shadow-lg"><BarChart3 className="h-8 w-8 text-white" /></div>
+          <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">Dashboard de Análisis Competitivo</h1>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <Card className="bg-card/80 backdrop-blur-sm border-primary/20 shadow-lg shadow-primary/10">
-          <CardHeader><CardTitle className="text-sm font-medium text-primary/80">⭐ Calificación Actual</CardTitle></CardHeader>
-          <CardContent><div className="text-2xl font-bold">{isLoadingSummary ? '...' : summaryData.rating}</div></CardContent>
-        </Card>
-        <Card className="bg-card/80 backdrop-blur-sm border-primary/20 shadow-lg shadow-primary/10">
-          <CardHeader><CardTitle className="text-sm font-medium text-primary/80">👥 Total de Reseñas</CardTitle></CardHeader>
-          <CardContent><div className="text-2xl font-bold">{isLoadingSummary ? '...' : summaryData.reviewCount}</div></CardContent>
-        </Card>
-        <Card className="bg-card/80 backdrop-blur-sm border-primary/20 shadow-lg shadow-primary/10">
-          <CardHeader><CardTitle className="text-sm font-medium text-primary/80">🏢 Competidores Seleccionados</CardTitle></CardHeader>
-          <CardContent><div className="text-2xl font-bold">{selectedCompetitors.length} / 5</div></CardContent>
-        </Card>
+        <Card><CardHeader><CardTitle className="text-sm font-medium">⭐ Calificación Actual</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{isLoadingSummary ? '...' : summaryData.rating}</div></CardContent></Card>
+        <Card><CardHeader><CardTitle className="text-sm font-medium">👥 Total de Reseñas</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{isLoadingSummary ? '...' : summaryData.reviewCount}</div></CardContent></Card>
+        <Card><CardHeader><CardTitle className="text-sm font-medium">🏢 Competidores Seleccionados</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{selectedCompetitors.length} / 5</div></CardContent></Card>
       </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-4 items-end mb-8 p-4 border border-primary/20 rounded-lg bg-card/80 backdrop-blur-sm shadow-md shadow-primary/10">
-        <CompetitorSelector selectedCompetitors={selectedCompetitors} onCompetitorsChange={setSelectedCompetitors} />
-        <Button onClick={handleCompare} disabled={selectedCompetitors.length === 0 || isLoadingCompare} variant="outline" className="border-primary text-primary hover:bg-primary/20 hover:text-primary">
-          {isLoadingCompare ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-          {isLoadingCompare ? 'Analizando...' : 'Comparar'}
-        </Button>
-      </div>
-
-      {}
-      {hasSearched && (
-        <Tabs defaultValue="metrics" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 bg-secondary/50">
-            <TabsTrigger value="metrics" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary data-[state=active]:shadow-md data-[state=active]:shadow-primary/20">
-              📊 Métricas Comparativas
-            </TabsTrigger>
-            <TabsTrigger value="attributes" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary data-[state=active]:shadow-md data-[state=active]:shadow-primary/20">
-              🎯 Análisis de Atributos
-            </TabsTrigger>
-          </TabsList>
+      
+      <Tabs defaultValue="compare" className="space-y-6">
+        <TabsList className="flex w-full">
+          <TabsTrigger value="compare" className="flex-1">📊 Métricas Comparativas</TabsTrigger>
+          <TabsTrigger value="attributes" className="flex-1">🎯 Análisis de Atributos</TabsTrigger>
+          <TabsTrigger value="admin" className="flex-1">⚙️ Administración</TabsTrigger>
+        </TabsList>
+        <TabsContent value="compare">
           
-          <TabsContent value="metrics" className="space-y-6">
-            {isLoadingCompare ? <p className="text-center py-10">Cargando métricas...</p> : <MetricsCharts ratingData={metricsData?.ratingOverTime} volumeData={metricsData?.reviewsOverTime} distributionData={metricsData?.ratingDistribution} />}
-          </TabsContent>
-          
-          <TabsContent value="attributes" className="space-y-6">
-            {isLoadingCompare ? <p className="text-center py-10">Cargando análisis...</p> : <AttributeAnalysis businessData={attributeData} />}
-          </TabsContent>
-        </Tabs>
-      )}
+          {/* ================================================================== */}
+          {/* ▼▼▼ EL ÚNICO CAMBIO ESTÁ EN LA LÍNEA SIGUIENTE ▼▼▼ */}
+          {/* ================================================================== */}
 
-      {!hasSearched && (
-        <div className="text-center text-muted-foreground mt-10 p-8 border-2 border-dashed border-primary/30 rounded-lg">
-          <p>Selecciona tus competidores y haz clic en "Comparar" para iniciar el análisis.</p>
-        </div>
-      )}
+          {/* Cambiamos [1fr_auto] por [auto_1fr] para que el botón se estire */}
+          <div className="grid grid-cols-1 md:grid-cols-[auto_1fr] gap-4 items-end p-4 border rounded-lg bg-white shadow-sm">
+            
+            {/* 1. El selector ahora ocupa su espacio natural ('auto') */}
+            <CompetitorSelector selectedCompetitors={selectedCompetitors} onCompetitorsChange={setSelectedCompetitors} />
+            
+            {/* 2. El botón ahora ocupa todo el espacio restante ('1fr') */}
+            <Button onClick={handleCompare} disabled={selectedCompetitors.length === 0 || isLoadingCompare}>
+              {isLoadingCompare ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              {isLoadingCompare ? 'Analizando...' : 'Comparar'}
+            </Button>
+          </div>
+
+          {/* ================================================================== */}
+          {/* ▲▲▲ FIN DEL CAMBIO ▲▲▲ */}
+          {/* ================================================================== */}
+          
+          {/* El área de contenido (Gráficos o Placeholder) va después */}
+          <div className="mt-6">
+            {hasSearched ? (
+              isLoadingCompare ? <p className="text-center py-10">Cargando métricas...</p> : <MetricsCharts ratingData={metricsData?.ratingOverTime} volumeData={metricsData?.reviewsOverTime} distributionData={metricsData?.ratingDistribution} />
+            ) : (
+              <div className="text-center text-gray-500 p-8 border-2 border-dashed rounded-lg">
+                <p>Selecciona tus competidores y haz clic en "Comparar" para iniciar el análisis.</p>
+              </div>
+            )}
+          </div>
+        </TabsContent>
+        
+        {/* Contenido de la pestaña de Atributos */}
+        <TabsContent value="attributes">
+           {hasSearched ? (
+            isLoadingCompare ? <p className="text-center py-10">Cargando análisis...</p> : <AttributeAnalysis businessData={attributeData} />
+           ) : (
+            <div className="text-center text-gray-500 mt-10 p-8 border-2 border-dashed rounded-lg">
+              <p>Primero realiza una comparación para ver el análisis de atributos.</p>
+            </div>
+           )}
+        </TabsContent>
+        
+        {/* Contenido de la pestaña de Administración */}
+        <TabsContent value="admin">
+          <JsonUploader />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

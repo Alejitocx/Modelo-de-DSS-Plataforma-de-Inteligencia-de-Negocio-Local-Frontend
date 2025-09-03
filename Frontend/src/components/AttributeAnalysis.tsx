@@ -57,7 +57,7 @@ export function AttributeAnalysis({ businessData }: AttributeAnalysisProps) {
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader> 
         <CardTitle>📊 Tabla Comparativa de Atributos</CardTitle>
       </CardHeader>
       <CardContent>

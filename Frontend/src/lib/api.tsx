@@ -114,3 +114,25 @@ export async function fetchBusinessAttributes(businessIds: string[]): Promise<an
   }
   return response.json();
 }
+
+export async function uploadJsonFile(
+  file: File,
+  collectionType: 'negocios' | 'resenas' | 'tips' | 'usuario' | 'checkin'
+): Promise<any> {
+  const formData = new FormData();
+  formData.append('file', file); // El archivo
+  formData.append('type', collectionType); // El tipo de colección
+
+  // Asegúrate de que la ruta sea la correcta para tu endpoint de carga
+  const response = await fetch(`${API_BASE_URL}/api/v1/admin/upload-json`, {
+    method: 'POST',
+    // NO se especifica Content-Type, el navegador lo hace automáticamente para FormData
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || 'Error al subir el archivo');
+  }
+  return response.json();
+}
