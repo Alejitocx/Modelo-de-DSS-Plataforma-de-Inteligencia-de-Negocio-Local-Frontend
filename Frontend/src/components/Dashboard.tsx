@@ -8,9 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { BarChart3, Loader2 } from 'lucide-react';
 import { fetchCompareMetrics, fetchBusinessAttributes, fetchKpi, CompareData } from '../lib/api';
-import { Slider } from './ui/slider'; 
 import { calculateMovingAverage } from '../lib/calculateMovingAverage'; 
-// Se importa la nueva sección de ayuda en lugar del botón
 import { HelpSection } from './DashboardHelpButton';
 
 const COLOR_PALETTE = ['#1e90ff', '#ff4500', '#32cd32', '#9370db', '#00ced1', '#ffa500'];
@@ -28,7 +26,6 @@ export function Dashboard() {
   const [isLoadingCompare, setIsLoadingCompare] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
 
-  const [movingAverageWindow, setMovingAverageWindow] = useState(3);
   const [processedMetricsData, setProcessedMetricsData] = useState<CompareData | null>(null);
 
   useEffect(() => {
@@ -51,29 +48,17 @@ export function Dashboard() {
 
   useEffect(() => {
     if (!metricsData) return;
-
+    const TEN_YEAR_WINDOW = 120;
     const newProcessedData = JSON.parse(JSON.stringify(metricsData));
 
     if (newProcessedData.ratingOverTime && newProcessedData.ratingOverTime.datasets) {
-      const originalDatasets = [...newProcessedData.ratingOverTime.datasets];
-      newProcessedData.ratingOverTime.datasets = [];
-
-      originalDatasets.forEach(dataset => {
-        newProcessedData.ratingOverTime.datasets.push({ ...dataset });
-
-        if (movingAverageWindow > 1) {
-          const movingAverageData = calculateMovingAverage(dataset.data, movingAverageWindow);
-          newProcessedData.ratingOverTime.datasets.push({
-            ...dataset,
-            label: `${dataset.label} (Media Móvil)`,
-            data: movingAverageData,
-          });
-        }
+      newProcessedData.ratingOverTime.datasets.forEach((dataset: any) => {
+        dataset.data = calculateMovingAverage(dataset.data, TEN_YEAR_WINDOW);
       });
     }
     
     setProcessedMetricsData(newProcessedData);
-  }, [metricsData, movingAverageWindow]);
+  }, [metricsData]);
 
   const handleCompare = async () => {
     if (selectedCompetitors.length === 0) return;
@@ -103,7 +88,7 @@ export function Dashboard() {
     finally { setIsLoadingCompare(false); }
   };
 
-   return ( 
+  return (
     <div className="min-h-screen p-4 md:p-6 bg-gray-50">
       <div className="mb-8 text-center">
         <div className="inline-flex items-center gap-3 mb-4">
@@ -118,10 +103,7 @@ export function Dashboard() {
         <Card><CardHeader><CardTitle className="text-sm font-medium">🏢 Competidores Seleccionados</CardTitle></CardHeader><CardContent><div className="text-2xl font-bold">{selectedCompetitors.length} / 5</div></CardContent></Card>
       </div>
 
-      {/* Contenedor grid para controlar el espaciado entre las pestañas y la ayuda */}
-      <div className="grid grid-rows-auto gap-16">
-
-        {/* Elemento 1: Las Pestañas */}
+      <main>
         <Tabs defaultValue="compare" className="space-y-6">
           <TabsList className="flex w-full">
             <TabsTrigger value="compare" className="flex-1">📊 Métricas Comparativas</TabsTrigger>
@@ -129,7 +111,8 @@ export function Dashboard() {
             <TabsTrigger value="admin" className="flex-1">⚙️ Administración</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="compare">
+          {/* Se añade una altura mínima a cada contenido de pestaña */}
+          <TabsContent value="compare" className="min-h-[60vh]">
             <div className="grid grid-cols-1 md:grid-cols-[auto_1fr] gap-4 items-end p-4 border rounded-lg bg-white shadow-sm">
               <CompetitorSelector selectedCompetitors={selectedCompetitors} onCompetitorsChange={setSelectedCompetitors} />
               <Button onClick={handleCompare} disabled={selectedCompetitors.length === 0 || isLoadingCompare}>
@@ -138,26 +121,6 @@ export function Dashboard() {
               </Button>
             </div>
             
-            {hasSearched && !isLoadingCompare && (
-              <Card className="mt-6 p-4">
-                <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                  <label htmlFor="ma-slider" className="text-sm font-medium shrink-0">Suavizar tendencia (Media Móvil):</label>
-                  <Slider
-                    id="ma-slider"
-                    value={[movingAverageWindow]}
-                    onValueChange={(value) => setMovingAverageWindow(value[0])}
-                    min={1}
-                    max={12}
-                    step={1}
-                    className="w-full sm:w-[200px]"
-                  />
-                  <span className="text-sm font-semibold w-full sm:w-24 text-left sm:text-right">
-                    {movingAverageWindow === 1 ? 'Desactivado' : `${movingAverageWindow} meses`}
-                  </span>
-                </div>
-              </Card>
-            )}
-
             <div className="mt-6">
               {hasSearched ? (
                 isLoadingCompare ? <p className="text-center py-10">Cargando métricas...</p> : 
@@ -174,16 +137,18 @@ export function Dashboard() {
             </div>
           </TabsContent>
           
-          <TabsContent value="attributes">
+          <TabsContent value="attributes" className="min-h-[60vh]">
             {hasSearched ? ( isLoadingCompare ? <p className="text-center py-10">Cargando análisis...</p> : <AttributeAnalysis businessData={attributeData} /> ) : ( <div className="text-center text-gray-500 mt-10 p-8 border-2 border-dashed rounded-lg"> <p>Primero realiza una comparación para ver el análisis de atributos.</p> </div> )}
           </TabsContent>
-          <TabsContent value="admin">
+          
+          <TabsContent value="admin" className="min-h-[60vh]">
             <JsonUploader />
           </TabsContent>
         </Tabs>
+      </main>
 
+      <div className="mt-24">
         <HelpSection />
-        
       </div>
     </div>
   );
