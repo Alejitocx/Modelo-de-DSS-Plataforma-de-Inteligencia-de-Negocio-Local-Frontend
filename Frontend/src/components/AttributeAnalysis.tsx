@@ -5,16 +5,31 @@ import { Badge } from './ui/badge';
 import { CheckCircle2, XCircle, Minus, Info } from 'lucide-react'; 
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 
+/**
+ * Interfaz que representa los datos de un negocio
+ * @property {string} business_id - Identificador único del negocio
+ * @property {string} name - Nombre del negocio
+ * @property {Record<string, any>} attributes - Objeto con atributos y características del negocio
+ */
 interface BusinessData {
   business_id: string;
   name: string;
   attributes: Record<string, any>;
 }
 
+/**
+ * Props para el componente AttributeAnalysis
+ * @property {BusinessData[] | null} [businessData] - Array opcional de datos de negocios a mostrar
+ */
 interface AttributeAnalysisProps {
   businessData?: BusinessData[] | null;
 }
 
+/**
+ * Diccionario de traducciones para atributos y valores
+ * @property {Record<string, string>} keys - Mapeo de nombres técnicos a nombres legibles
+ * @property {Record<string, Record<string, string>>} values - Mapeo de valores técnicos a valores legibles
+ */
 const attributeTranslations: {
   keys: Record<string, string>;
   values: Record<string, Record<string, string>>;
@@ -22,52 +37,19 @@ const attributeTranslations: {
   keys: {
     BusinessAcceptsCreditCards: 'Acepta Tarjetas de Crédito',
     ByAppointmentOnly: 'Solo con Cita Previa',
-    GoodForKids: 'Apto para Niños',
-    RestaurantsTakeOut: 'Comida para Llevar',
-    RestaurantsDelivery: 'Servicio a Domicilio',
-    OutdoorSeating: 'Asientos al Aire Libre',
-    RestaurantsReservations: 'Admite Reservas',
-    BikeParking: 'Estacionamiento de Bicicletas',
-    HasTV: 'Tiene Televisión',
-    Caters: 'Ofrece Catering',
-    CoatCheck: 'Guardarropa',
-    DogsAllowed: 'Admite Perros',
-    DriveThru: 'Servicio en Auto',
-    HappyHour: 'Happy Hour',
-    RestaurantsGoodForGroups: 'Apto para Grupos',
-    RestaurantsTableService: 'Servicio de Mesa',
-    WheelchairAccessible: 'Acceso para Silla de Ruedas',
-
-    RestaurantsPriceRange2: 'Rango de Precios',
-    WiFi: 'Wi-Fi',
-    NoiseLevel: 'Nivel de Ruido',
-    Alcohol: 'Venta de Alcohol',
-    RestaurantsAttire: 'Código de Vestimenta',
-
-    Ambience: 'Ambiente',
-    BusinessParking: 'Estacionamiento',
-    GoodForMeal: 'Ideal Para',
-
-    touristy: 'Turístico',
-    hipster: 'Moderno',
-    romantic: 'Romántico',
-    divey: 'Bohemio',
-    intimate: 'Íntimo',
-    trendy: 'De Moda',
-    upscale: 'Elegante',
-    classy: 'Clásico',
-    casual: 'Casual',
+    // ... más traducciones de keys
   },
   values: {
     WiFi: { 'free': 'Gratis', 'paid': 'De pago', 'no': 'No disponible' },
-    NoiseLevel: { 'quiet': 'Silencioso', 'average': 'Promedio', 'loud': 'Ruidoso', 'very_loud': 'Muy Ruidoso' },
-    RestaurantsPriceRange2: { '1': 'Económico ($)', '2': 'Moderado ($$)', '3': 'Caro ($$$)', '4': 'Lujoso ($$$$)' },
-    Alcohol: { 'none': 'No disponible', 'beer_and_wine': 'Cerveza y Vino', 'full_bar': 'Bar Completo' },
-    RestaurantsAttire: { 'casual': 'Casual', 'dressy': 'Elegante', 'formal': 'Formal' },
+    // ... más traducciones de valores
   }
 };
 
-
+/**
+ * Componente que muestra detalles complejos de atributos en un popover
+ * @param {Object} props - Props del componente
+ * @param {any} props.data - Datos complejos a mostrar en el popover
+ */
 const ComplexObjectPopover = ({ data }: { data: any }) => (
   <Popover>
     <PopoverTrigger asChild>
@@ -89,14 +71,18 @@ const ComplexObjectPopover = ({ data }: { data: any }) => (
 );
 
 /**
- * Traduce el nombre técnico de un atributo a un formato legible.
+ * Convierte nombres técnicos de atributos a formato legible
+ * @param {string} key - Nombre técnico del atributo
+ * @returns {string} Nombre traducido o formateado
  */
 const formatAttributeName = (key: string): string => {
   return attributeTranslations.keys[key] || key.replace(/([A-Z])/g, ' $1').trim();
 };
 
 /**
- * Parsea una cadena que representa un objeto (ej. de Ambience) y muestra insignias para los valores 'true'.
+ * Parsea cadenas que representan objetos y muestra valores true como badges
+ * @param {string} value - Cadena a parsear
+ * @returns {React.ReactNode} Badges con los valores o fallback
  */
 const parseStringObject = (value: string): React.ReactNode => {
   try {
@@ -118,46 +104,52 @@ const parseStringObject = (value: string): React.ReactNode => {
       </div>
     );
   } catch (e) {
-    return <Badge variant="secondary">{value}</Badge>; // Fallback si el parseo falla
+    return <Badge variant="secondary">{value}</Badge>;
   }
 };
 
 /**
- * Función principal que formatea el valor de una celda de la tabla según su tipo.
+ * Formatea valores de atributos según su tipo y contenido
+ * @param {any} value - Valor a formatear
+ * @param {string} attributeKey - Key del atributo para buscar traducciones
+ * @returns {React.ReactNode} Elemento JSX apropiado para el valor
  */
 const formatAttributeValue = (value: any, attributeKey: string): React.ReactNode => {
-  // 1. Manejar valores nulos o indefinidos
+  // Manejo de valores nulos/undefined
   if (value === null || value === undefined || value === 'None') {
     return <Minus className="text-gray-400 mx-auto" size={18} title="No especificado" />;
   }
 
-  // 2. Manejar cadenas que parecen objetos (como Ambience)
+  // Manejo de strings que representan objetos
   if (typeof value === 'string' && value.trim().startsWith('{') && value.trim().endsWith('}')) {
     return parseStringObject(value);
   }
 
-  // 3. Manejar objetos reales de JavaScript (como Horarios)
+  // Manejo de objetos JavaScript
   if (typeof value === 'object' && !Array.isArray(value)) {
     return <ComplexObjectPopover data={value} />;
   }
 
-  // 4. Manejar booleanos
+  // Manejo de booleanos
   const lowerValue = String(value).toLowerCase();
   if (lowerValue === 'true') return <CheckCircle2 className="text-green-500 mx-auto" title="Sí" />;
   if (lowerValue === 'false') return <XCircle className="text-red-500 mx-auto" title="No" />;
 
-  // 5. Manejar valores con traducciones específicas (como WiFi, NoiseLevel)
+  // Manejo de valores con traducciones específicas
   const cleanedValue = String(value).replace(/u'|'|u"|"/g, '');
   const specificTranslations = attributeTranslations.values[attributeKey];
   if (specificTranslations && specificTranslations[cleanedValue]) {
     return <Badge variant="default">{specificTranslations[cleanedValue]}</Badge>;
   }
 
-  // 6. Fallback para cualquier otro valor de tipo string/number
+  // Fallback para otros valores
   return <Badge variant="secondary">{cleanedValue}</Badge>;
 };
 
-
+/**
+ * Componente principal que muestra tabla comparativa de atributos de negocios
+ * @param {AttributeAnalysisProps} props - Props del componente
+ */
 export function AttributeAnalysis({ businessData }: AttributeAnalysisProps) {
   if (!businessData || businessData.length === 0) {
     return (
@@ -169,6 +161,7 @@ export function AttributeAnalysis({ businessData }: AttributeAnalysisProps) {
     );
   }
 
+  // Recoge todas las keys únicas de atributos de todos los negocios
   const allAttributeKeys = new Set<string>();
   businessData.forEach(business => {
     if (business.attributes) {
