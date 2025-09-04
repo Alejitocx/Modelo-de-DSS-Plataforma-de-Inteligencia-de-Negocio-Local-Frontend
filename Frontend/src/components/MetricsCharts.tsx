@@ -4,6 +4,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 interface ChartDataset { label: string; data: (number | null)[]; color: string; }
 interface ChartData { labels: string[]; datasets: ChartDataset[]; }
 interface MetricsChartsProps { ratingData?: ChartData; volumeData?: ChartData; distributionData?: ChartData; }
+
 const transformApiDataForChart = (apiData?: ChartData) => {
   if (!apiData || !apiData.labels || !apiData.datasets) return [];
   const { labels, datasets } = apiData;
@@ -30,7 +31,7 @@ export function MetricsCharts({ ratingData, volumeData, distributionData }: Metr
                 <div key={pld.dataKey} className="flex items-center">
                   <div style={{ backgroundColor: pld.color }} className="w-3 h-3 rounded-full mr-2"></div>
                   <p className="text-sm text-gray-600">{`${pld.dataKey}: `}</p>
-                  <p className="text-sm font-semibold ml-1">{`${pld.value.toFixed(1)} estrellas`}</p>
+                  <p className="text-sm font-semibold ml-1">{`${pld.value.toFixed(2)} estrellas`}</p>
                 </div>
               )
             ))}
@@ -49,9 +50,10 @@ export function MetricsCharts({ ratingData, volumeData, distributionData }: Metr
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <Card className="lg:col-span-2">
         <CardHeader>
-          <CardTitle>📈 Puntuación Promedio a lo Largo del Tiempo</CardTitle>
+          <CardTitle>📈 Tendencia de Puntuación a Largo Plazo</CardTitle>
+          {/* CAMBIO: Se actualiza la descripción para reflejar el único dato visible. */}
           <CardDescription>
-            La línea sólida muestra la tendencia (media móvil) y la punteada los datos mensuales.
+            Muestra la tendencia suavizada (media móvil de 10 años) de la puntuación promedio.
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-6">
@@ -63,29 +65,24 @@ export function MetricsCharts({ ratingData, volumeData, distributionData }: Metr
               <Tooltip content={<CustomTooltip />} />
               <Legend verticalAlign="top" align="right" wrapperStyle={{ paddingBottom: '20px' }} />
               
-              {/* LÓGICA DE ESTILO PARA DISTINGUIR LAS LÍNEAS */}
-              {(ratingData?.datasets || []).map((dataset) => {
-                const isMovingAverage = dataset.label.includes('(Media Móvil)');
-                return (
-                  <Line 
-                    key={dataset.label}
-                    connectNulls={false}
-                    type="linear" 
-                    dataKey={dataset.label} 
-                    stroke={dataset.color}
-                    strokeWidth={isMovingAverage ? 3 : 1.5}
-                    strokeDasharray={isMovingAverage ? "1" : "4 4"}
-                    dot={false}
-                    activeDot={isMovingAverage ? { r: 8, strokeWidth: 2 } : false}
-                  />
-                );
-              })}
+              {/* CAMBIO: Se simplifica la lógica. Todas las líneas son sólidas y gruesas. */}
+              {(ratingData?.datasets || []).map((dataset) => (
+                <Line 
+                  key={dataset.label}
+                  connectNulls={true} // Se recomienda conectar nulos para una media móvil
+                  type="linear" 
+                  dataKey={dataset.label} 
+                  stroke={dataset.color}
+                  strokeWidth={3} // Línea siempre gruesa
+                  dot={false}
+                  activeDot={{ r: 8, strokeWidth: 2 }}
+                />
+              ))}
             </LineChart>
           </ResponsiveContainer>
         </CardContent>
       </Card>
-
-      {/* ... (los otros dos gráficos se mantienen igual) ... */}
+      
       <Card>
         <CardHeader><CardTitle>📊 Volumen de Reseñas por Mes</CardTitle></CardHeader>
         <CardContent className="pt-6">
