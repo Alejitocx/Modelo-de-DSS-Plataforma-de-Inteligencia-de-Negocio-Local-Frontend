@@ -59,6 +59,32 @@
     --input: 217 32% 17%;
     --ring: 175 100% 50%;
   }
+
+  .dark-scrollbar::-webkit-scrollbar {
+  width: 8px; /* Ancho de la scrollbar vertical */
+  height: 8px; /* Alto de la scrollbar horizontal */
+}
+
+.dark-scrollbar::-webkit-scrollbar-track {
+  background: #1e293b; /* Color del fondo de la pista (ligeramente más claro que el fondo del modal) */
+  border-radius: 10px;
+}
+
+.dark-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #475569; /* Color del "pulgar" o la barra móvil */
+  border-radius: 10px;
+  border: 2px solid #1e293b; /* Crea un pequeño borde alrededor del pulgar */
+}
+
+.dark-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #64748b; /* Color del pulgar al pasar el ratón por encima */
+}
+
+/* Funciona en Firefox */
+.dark-scrollbar {
+  scrollbar-width: thin; /* Puede ser 'auto', 'thin' o 'none' */
+  scrollbar-color: #475569 #1e293b; /* Color del pulgar y de la pista */
+}
 }
 
 @layer base {

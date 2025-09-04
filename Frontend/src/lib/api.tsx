@@ -120,13 +120,11 @@ export async function uploadJsonFile(
   collectionType: 'negocios' | 'resenas' | 'tips' | 'usuario' | 'checkin'
 ): Promise<any> {
   const formData = new FormData();
-  formData.append('file', file); // El archivo
-  formData.append('type', collectionType); // El tipo de colección
+  formData.append('file', file); 
+  formData.append('type', collectionType); 
 
-  // Asegúrate de que la ruta sea la correcta para tu endpoint de carga
   const response = await fetch(`${API_BASE_URL}/api/v1/admin/upload-json`, {
     method: 'POST',
-    // NO se especifica Content-Type, el navegador lo hace automáticamente para FormData
     body: formData,
   });
 
