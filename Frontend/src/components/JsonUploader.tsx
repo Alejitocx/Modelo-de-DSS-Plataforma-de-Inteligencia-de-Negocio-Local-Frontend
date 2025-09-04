@@ -7,9 +7,6 @@ import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 import { uploadJsonFile } from '../lib/api';
 
-// ▼▼▼ CAMBIO PRINCIPAL AQUÍ ▼▼▼
-// Los 'value' ahora están en español para coincidir con el backend.
-// Ahora el frontend y el backend están sincronizados.
 const collections = [
   { value: 'negocios', label: 'Negocios (Businesses)', requiredKeys: ['business_id', 'name', 'state'] },
   { value: 'resenas',  label: 'Reseñas (Reviews)', requiredKeys: ['review_id', 'user_id', 'business_id', 'stars'] },
@@ -17,6 +14,35 @@ const collections = [
   { value: 'tips',     label: 'Tips', requiredKeys: ['user_id', 'business_id', 'text', 'date'] },
   { value: 'checkin',  label: 'Check-ins', requiredKeys: ['business_id', 'date'] },
 ];
+
+const generateSuccessMessage = (result: { upserted: number; modified: number }): string => {
+  const { upserted, modified } = result;
+  if (upserted > 0 && modified > 0) return `¡Carga completada! Se añadieron ${upserted} nuevos registros y se actualizaron ${modified} existentes.`;
+  if (upserted > 0) return `¡Carga completada! Se añadieron ${upserted} nuevos registros.`;
+  if (modified > 0) return `¡Carga completada! Se actualizaron ${modified} registros existentes.`;
+  return 'Proceso finalizado. El archivo no contenía registros nuevos o diferentes para actualizar.';
+};
+
+const generateErrorMessage = (error: any, selectedCollection: string): string => {
+  const errorMessage = String(error.message || 'Error desconocido').toLowerCase();
+  const collectionInfo = collections.find(c => c.value === selectedCollection);
+  const collectionLabel = collectionInfo ? collectionInfo.label.split('(')[0].trim() : 'la colección seleccionada';
+
+  if (errorMessage.includes('validación fallida')) {
+    const missingKey = errorMessage.split("'")[1] || 'una columna requerida';
+    return `Error de Contenido: El archivo no tiene el formato correcto para "${collectionLabel}". Asegúrate de que el archivo contiene la columna "${missingKey}".`;
+  }
+
+  if (errorMessage.includes('json')) {
+    return 'Error de Formato: El archivo seleccionado no parece ser un JSON válido. Por favor, verifica su estructura e inténtalo de nuevo.';
+  }
+  if (errorMessage.includes('network') || errorMessage.includes('failed to fetch')) {
+    return 'Error de Conexión: No se pudo comunicar con el servidor. Por favor, revisa tu conexión a internet.';
+  }
+  
+  return 'Ocurrió un error inesperado. Por favor, revisa el archivo y vuelve a intentarlo.';
+};
+
 
 export function JsonUploader() {
   const [selectedCollection, setSelectedCollection] = useState<string>('');
@@ -44,6 +70,7 @@ export function JsonUploader() {
     const firstItem = data[0];
     for (const key of collection.requiredKeys) {
       if (!(key in firstItem)) {
+        // Este es el mensaje que ahora "traduciremos"
         setStatus({ type: 'error', message: `Validación fallida: El primer objeto en el JSON no tiene la clave requerida '${key}'.` });
         return false;
       }
@@ -64,15 +91,16 @@ export function JsonUploader() {
         const data = JSON.parse(content);
 
         if (!validateJson(data, selectedCollection)) {
+          setStatus(prevStatus => ({ ...prevStatus, message: generateErrorMessage(new Error(prevStatus.message), selectedCollection) }));
           setIsUploading(false);
           return;
         }
         
-        // 'selectedCollection' ahora contiene el valor correcto en español (ej: 'negocios', 'tips', etc.)
         const result = await uploadJsonFile(selectedFile, selectedCollection as any);
-        setStatus({ type: 'success', message: `¡Éxito! Registros afectados: ${JSON.stringify(result)}` });
+        setStatus({ type: 'success', message: generateSuccessMessage(result) });
+
       } catch (error: any) {
-        setStatus({ type: 'error', message: error.message || 'Error desconocido al procesar el archivo.' });
+        setStatus({ type: 'error', message: generateErrorMessage(error, selectedCollection) });
       } finally {
         setIsUploading(false);
       }
@@ -105,7 +133,7 @@ export function JsonUploader() {
         {status.type !== 'idle' && (
           <Alert variant={status.type === 'error' ? 'destructive' : 'default'}>
             {status.type === 'success' ? <CheckCircle className="h-4 w-4" /> : <AlertCircle className="h-4 w-4" />}
-            <AlertTitle>{status.type === 'success' ? 'Completado' : 'Error'}</AlertTitle>
+            <AlertTitle>{status.type === 'success' ? 'Proceso Completado' : 'Ocurrió un Error'}</AlertTitle>
             <AlertDescription>{status.message}</AlertDescription>
           </Alert>
         )}
