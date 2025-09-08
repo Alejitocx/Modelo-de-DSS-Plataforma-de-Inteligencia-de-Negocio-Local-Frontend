@@ -42,7 +42,7 @@ La comunicación se realiza mediante **fetch/axios** hacia la API, integrando la
 
 - Conexión al **backend (API RESTful)** documentado con Swagger/OpenAPI.  
 - Uso de **React Router** para la gestión de rutas y vistas.  
-- Manejo de estado con **Context API o Redux** según complejidad de la aplicación.  
+- Manejo de estado con **Context API** según complejidad de la aplicación.  
 - Integración de librerías de visualización de datos (ej. **Recharts**).  
 - Estilos implementados con **CSS Modules, TailwindCSS o Styled Components** para consistencia visual.  
 - Configuración lista para **entornos de desarrollo y producción**.  
@@ -76,4 +76,4 @@ Un dueño de restaurante ingresa a la plataforma y, desde el panel, observa un g
 
 ## 📝 Estado del Proyecto
 
-📌 **En desarrollo (MVP)** – El frontend está en fase de integración con el backend, construyendo los componentes visuales del panel de control y validando la correcta representación de los datos en tiempo real.
+📌 **Terminado (MVP)** – El frontend está en fase de integración con el backend, construyendo los componentes visuales del panel de control y validando la correcta representación de los datos en tiempo real.
